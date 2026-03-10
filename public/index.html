@@ -168,6 +168,16 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
     <div class="sidebar">
 
       <!-- ADMIN: upload -->
+      <!-- API KEY SECTION -->
+      <div class="sb-section" id="apiKeySection" style="display:none">
+        <div class="sec-label">API Key de Anthropic</div>
+        <div id="apiKeyOk" style="display:none;background:#0d1f14;border:1px solid var(--accent);border-radius:8px;padding:10px;font-size:11px;color:var(--accent);text-align:center;">✅ API Key configurada</div>
+        <div id="apiKeyForm">
+          <input type="password" class="inp" id="apiKeyInput" placeholder="sk-ant-api03-..." style="margin-bottom:8px;font-size:11px;"/>
+          <button class="btn-analyze" style="margin-top:0" onclick="saveApiKey()">Guardar API Key</button>
+        </div>
+      </div>
+
       <div class="sb-section" id="adminUpload" style="display:none">
         <div class="sec-label">Subir Archivo</div>
         <div class="upload-zone" id="uploadZone">
@@ -275,11 +285,22 @@ function logout() {
   document.getElementById('chatMessages').innerHTML = '<div class="empty-state" id="emptyState"><div class="empty-icon">🤖</div><div class="empty-title">Agente listo</div><div class="empty-sub" id="emptySubText">Sube un archivo para comenzar el análisis.</div></div>';
 }
 
+async function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return alert('Pega tu API key');
+  try {
+    await api('/api/set-apikey','POST',{apiKey: key});
+    document.getElementById('apiKeyOk').style.display = 'block';
+    document.getElementById('apiKeyForm').style.display = 'none';
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
 function initRole() {
   const badge = document.getElementById('roleBadge');
   if (role === 'admin') {
     badge.textContent = '⬡ Administrador';
     badge.className = 'role-badge admin';
+    document.getElementById('apiKeySection').style.display = 'block';
     document.getElementById('adminUpload').style.display = 'block';
     document.getElementById('emptySubText').textContent = 'Sube un archivo CSV o Excel para comenzar.';
     setupUpload();
